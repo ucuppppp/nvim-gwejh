@@ -2,7 +2,6 @@ return {
 	"pmizio/typescript-tools.nvim",
 	dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 	config = function()
-		local lspconfig_util = require("lspconfig.util")
 		local cwd = vim.loop.cwd()
 
 		local function has_deno_json(path)

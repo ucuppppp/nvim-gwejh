@@ -29,7 +29,7 @@ return {
 	"creativenull/efmls-configs-nvim",
 	version = "v1.7.0",
 	dependencies = {
-		require("ucup.plugin.lsp"),
+		require("ucup.plugins.lsp"),
 		"neovim/nvim-lspconfig",
 	},
 
@@ -79,8 +79,8 @@ return {
 			},
 		}
 
-		require("lspconfig").efm.setup(vim.tbl_extend("force", efmls_config, {
+		vim.lsp.config["efm"] = vim.tbl_extend("force", efmls_config, {
 			on_attach = lsp_format.on_attach,
-		}))
+		})
 	end,
 }

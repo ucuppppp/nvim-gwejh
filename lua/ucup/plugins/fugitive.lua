@@ -12,6 +12,6 @@ return {
 		end, { desc = "Git Diff (Fugitive)" })
 
 		-- Load konfigurasi tambahan (kalau ada)
-		require("ucup.plugin.fugitive")
+		require("ucup.plugins.fugitive")
 	end,
 }

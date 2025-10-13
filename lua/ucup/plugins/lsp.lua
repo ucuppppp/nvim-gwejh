@@ -32,12 +32,15 @@ return {
 			dynamicRegistration = false,
 			lineFoldingOnly = true,
 		}
-		local language_servers = require("lspconfig").util.available_servers() -- or list servers manually like {'gopls', 'clangd'}
-		for _, ls in ipairs(language_servers) do
-			require("lspconfig")[ls].setup({
+		local servers = vim.lsp.ge_clients or { "lua_ls", "gopls", "ts_ls", "rust_analyzer" } -- or list servers manually like {'gopls', 'clangd'}
+		for _, name in ipairs(servers) do
+			vim.lsp.config[name] = {
 				capabilities = capabilities,
-				-- you can add other fields for setting up lsp server in this table
-			})
+				on_attach = function(client, bufnr)
+					-- tambahkan keymaps, formatting, dsb
+				end,
+				-- settings = { ... },  -- optional
+			}
 		end
 		require("ufo").setup()
 
@@ -55,10 +58,10 @@ return {
 		require("mason-lspconfig").setup({
 			handlers = {
 				function(server_name)
-					require("lspconfig")[server_name].setup({})
+					vim.lsp.config[server_name] = {}
 				end,
 				["yamlls"] = function()
-					require("lspconfig").yamlls.setup({
+					vim.lsp.config.yamlls = {
 						capabilities = capabilities,
 						settings = {
 							yaml = {
@@ -69,12 +72,12 @@ return {
 								},
 							},
 						},
-					})
+					}
 				end,
 				["volar"] = function()
-					require("lspconfig").volar.setup({
+					vim.lsp.config.volar = {
 						filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
-					})
+					}
 				end,
 			},
 		})
