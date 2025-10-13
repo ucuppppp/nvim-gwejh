@@ -22,5 +22,5 @@ vim.g.maplocalleader = "\\"
 
 -- Setup lazy.nvim
 require("lazy").setup({
-	spec = "ucup.plugin",
+	spec = "ucup.plugins",
 })
