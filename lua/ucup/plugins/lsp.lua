@@ -2,7 +2,6 @@ return {
 	"VonHeikemen/lsp-zero.nvim",
 	branch = "v3.x",
 	dependencies = {
-		--- Uncomment the two plugins below if you want to manage the language servers from neovim
 		{ "williamboman/mason.nvim" },
 		{ "williamboman/mason-lspconfig.nvim" },
 		{ "neovim/nvim-lspconfig" },
@@ -15,39 +14,31 @@ return {
 		{ "onsails/lspkind.nvim" },
 	},
 	config = function()
-		-- issue https://github.com/nvim-telescope/telescope.nvim/issues/3436
 		vim.o.winborder = "rounded"
 
 		-- Folding
-		vim.o.foldcolumn = "1" -- '0' is not bad
-		vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+		vim.o.foldcolumn = "1"
+		vim.o.foldlevel = 99
 		vim.o.foldlevelstart = 99
 		vim.o.foldenable = true
 
 		vim.keymap.set("n", "zR", require("ufo").openAllFolds)
 		vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
 
+		-- Capabilities untuk folding
 		local capabilities = vim.lsp.protocol.make_client_capabilities()
 		capabilities.textDocument.foldingRange = {
 			dynamicRegistration = false,
 			lineFoldingOnly = true,
 		}
-		local servers = vim.lsp.ge_clients or { "lua_ls", "gopls", "ts_ls", "rust_analyzer" } -- or list servers manually like {'gopls', 'clangd'}
-		for _, name in ipairs(servers) do
-			vim.lsp.config[name] = {
-				capabilities = capabilities,
-				on_attach = function(client, bufnr)
-					-- tambahkan keymaps, formatting, dsb
-				end,
-				-- settings = { ... },  -- optional
-			}
-		end
+
+		-- Setup ufo
 		require("ufo").setup()
 
-		-- LSP
+		-- LSP Zero setup
 		local lsp_zero = require("lsp-zero")
 		local cmp = require("cmp")
-		local cmp_action = require("lsp-zero").cmp_action()
+		local cmp_action = lsp_zero.cmp_action()
 
 		lsp_zero.on_attach(function(client, bufnr)
 			lsp_zero.default_keymaps({ buffer = bufnr })
@@ -55,11 +46,17 @@ return {
 
 		require("luasnip.loaders.from_vscode").lazy_load()
 		require("mason").setup({})
+
+		-- Mason-lspconfig dengan vim.lsp.config (Neovim 0.11+)
 		require("mason-lspconfig").setup({
 			handlers = {
+				-- Default handler untuk semua server
 				function(server_name)
-					vim.lsp.config[server_name] = {}
+					vim.lsp.config[server_name] = {
+						capabilities = capabilities,
+					}
 				end,
+				-- Handler khusus untuk yamlls
 				["yamlls"] = function()
 					vim.lsp.config.yamlls = {
 						capabilities = capabilities,
@@ -67,22 +64,22 @@ return {
 							yaml = {
 								schemas = {
 									kubernetes = "/*.yaml",
-									-- Add the schema for gitlab piplines
-									-- ["https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json"] = "*.gitlab-ci.yml",
 								},
 							},
 						},
 					}
 				end,
+				-- Handler khusus untuk volar
 				["volar"] = function()
 					vim.lsp.config.volar = {
+						capabilities = capabilities,
 						filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
 					}
 				end,
 			},
 		})
 
-		lsp_zero.setup()
+		-- Completion setup
 		cmp.setup({
 			sources = {
 				{ name = "luasnip" },
@@ -118,12 +115,9 @@ return {
 			formatting = {
 				fields = { "abbr", "kind", "menu" },
 				format = require("lspkind").cmp_format({
-					mode = "symbol", -- show only symbol annotations
-					maxwidth = 50, -- prevent the popup from showing more than provided characters
-					ellipsis_char = "...", -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead
-					symbol_map = {
-						-- Method = "فعل",
-					},
+					mode = "symbol",
+					maxwidth = 50,
+					ellipsis_char = "...",
 				}),
 			},
 		})
